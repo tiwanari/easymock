@@ -77,7 +77,8 @@ public class Injector {
                 throw new AssertionError(e);
                 // ///CLOVER:ON
             }
-            if(testSubject == null) {
+            if (testSubject == null) {
+
                 throw new NullPointerException("Have you forgotten to instantiate " + f.getName() + "?");
             }
             Class<?> testSubjectClass = testSubject.getClass();
