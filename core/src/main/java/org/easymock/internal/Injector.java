@@ -16,11 +16,16 @@
 package org.easymock.internal;
 
 import org.easymock.*;
+import org.testng.collections.Lists;
+import org.testng.collections.Sets;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.*;
 
@@ -78,8 +83,17 @@ public class Injector {
                 // ///CLOVER:ON
             }
             if (testSubject == null) {
-
-                throw new NullPointerException("Have you forgotten to instantiate " + f.getName() + "?");
+                try {
+                    testSubject = instantiateTestSubject(f);
+                    if (testSubject == null) {
+                        throw new NullPointerException("Have you forgotten to instantiate " + f.getName() + "?");
+                    }
+                    f.setAccessible(true);
+                    f.set(host, testSubject);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                    // throw new NullPointerException("Failed to instantiate " + f.getName() + " automatically");
+                }
             }
             Class<?> testSubjectClass = testSubject.getClass();
             while (testSubjectClass != Object.class) {
@@ -153,6 +167,32 @@ public class Injector {
             mockType = valueMockType;
         }
         return mockType;
+    }
+
+    /**
+     * Tries instantiating a class annotated with {@link TestSubject} using its constructor.
+     * @param testSubjectField
+     */
+    private static Object instantiateTestSubject(Field testSubjectField) throws ReflectiveOperationException {
+        Class<?> type = testSubjectField.getType();
+        try {
+            Constructor<?> defaultConstructor = type.getDeclaredConstructor();
+            defaultConstructor.setAccessible(true);
+            return defaultConstructor.newInstance();
+        } catch (NoSuchMethodException e) {
+            System.out.println(e);
+        }
+
+        List<Constructor<?>> accessibleConstructors = stream(type.getDeclaredConstructors())
+            .filter(constructor -> !Sets.newHashSet(constructor.getModifiers()).contains(Modifier.PRIVATE))
+            .collect(Collectors.toList());
+        System.out.println(accessibleConstructors.size());
+
+        for (Constructor<?> constructor : accessibleConstructors) {
+            System.out.println(constructor.toString());
+        }
+
+        return null;
     }
 
     /**

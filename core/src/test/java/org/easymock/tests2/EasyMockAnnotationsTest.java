@@ -376,28 +376,4 @@ public abstract class EasyMockAnnotationsTest extends EasyMockSupport {
         assertSame(test.standardMock, test.toInjectOneTarget.m1);
         assertEquals(MocksControl.getControl(test.standardMock).getType(), MockType.STRICT);
     }
-
-
-    private static class ConstructorInjectionTest {
-        @Mock
-        protected IMethods m;
-
-        @Mock
-        protected IVarArgs v;
-
-        @TestSubject
-        protected ToInject toInject;
-    }
-
-    @Test
-    public void shouldInjectMocksToConstructorWhereTypeCompatible() {
-        ConstructorInjectionTest test = new ConstructorInjectionTest();
-        EasyMockSupport.injectMocks(test);
-        assertSame(test.m, test.toInject.m1);
-        assertSame(test.m, test.toInject.m2);
-        assertSame(test.v, test.toInject.v);
-        assertNull(test.toInject.a);
-        assertNull(test.toInject.f);
-        assertNull(ToInject.s);
-    }
 }

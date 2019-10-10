@@ -1,0 +1,14 @@
+
+ToInject
+
+Class<?> type = testSubjectField.getType();
+for (Constructor<?> constructor : type.getDeclaredConstructors()) {
+    System.out.println(constructor.toString());
+}
+
+private org.easymock.tests2.EasyMockAnnotationsTest$ToInject()
+org.easymock.tests2.EasyMockAnnotationsTest$ToInject(org.easymock.tests2.EasyMockAnnotationsTest$1) // this is created by the complier if there's at least one `new ToInject()` for allowing the caller class to access the `private` constructor (the $1 argument is always null. See the stackoverflow answer for more details)
+
+Therefore, we cannot use `getDeclaredConstructors() == 1` to check if there's only the default constructor. We have to try `getDeclaredConstructor()` to see if there's a constructor that doesn't have arguments.
+
+
